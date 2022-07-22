@@ -90,6 +90,10 @@ contract PandoraMultistaking is IERC721Receiver {
         return workers.length();
     }
 
+    function workerAt(uint256 index) external view returns (address) {
+        return workers.at(index);
+    }
+
     function execute(address worker, address to, bytes calldata data) external payable perm returns (bool success, bytes memory response) {
         return Worker(worker).execute(to, data);
     }
