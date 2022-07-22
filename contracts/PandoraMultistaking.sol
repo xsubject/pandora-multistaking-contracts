@@ -34,52 +34,6 @@ contract PandoraMultistaking is IERC721Receiver {
 
     IERC20 private busd = IERC20(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
 
-    function buy(uint256[] memory tokenIds) public payable {
-        _buy(tokenIds, true);
-    }
-
-    function _buy(uint256[] memory tokenIds, bool withReturn) private {
-        
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            _buy(tokenIds[i]);
-        }
-
-        if(withReturn) {
-            payable(msg.sender).transfer(address(this).balance);
-        }
-    }
-    
-
-    function _buy(uint256 tokenId) private {
-        _buy(tokenId, false);
-    }
-
-    function _buy(uint256 tokenId, bool withReturn) private {
-        
-        uint256 askId = exchange.currentAsks(pandoErc721, tokenId);
-        Ask memory ask = exchange.asks(pandoErc721, tokenId, askId);
-
-        address[] memory path = new address[](2);
-        path[0] = router.WETH();
-        path[1] = ask.erc20;
-        console.log("swap", address(this).balance, "to buy", tokenId);
-        console.log("path", path[0], path[1]);
-
-        console.log(ask.erc20, ask.seller, ask.price);
-
-        router.swapETHForExactTokens{value: address(this).balance}(ask.price, path, address(this), block.timestamp);
-
-        IERC20 erc20 = IERC20(ask.erc20);
-        erc20.approve(address(exchange), ask.price);
-
-        exchange.buy(pandoErc721, tokenId, ask.price);
-        require(address(this) == pando.ownerOf(tokenId), "Contract not owner of token");
-
-        if(withReturn) {
-            payable(msg.sender).transfer(address(this).balance);
-        }
-    }
-
     function stake(uint256[] memory tokenIds) public {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             stake(tokenIds[i]);
@@ -98,11 +52,6 @@ contract PandoraMultistaking is IERC721Receiver {
             workers.add(address(new Worker(pandoErc721)));
             stake(tokenId);
         }
-    }
-
-    function buyAndStake(uint256[] memory tokenIds) external payable {
-        buy(tokenIds);
-        stake(tokenIds);
     }
 
     function harvest(uint256 from, uint256 to) external returns (uint256) {
