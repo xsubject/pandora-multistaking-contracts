@@ -69,3 +69,16 @@ export const getWorkerInfo = async (worker: Contract) => {
 
     return {power, tokenIds};
 }
+
+export const keypress = async () => {
+    process.stdin.setRawMode(true)
+    return new Promise(resolve => process.stdin.once('data', data => {
+      const byteArray = [...data]
+      if (byteArray.length > 0 && byteArray[0] === 3) {
+        console.log('Bye!\n^C')
+        process.exit(1)
+      }
+      process.stdin.setRawMode(false)
+      resolve(true)
+    }))
+}

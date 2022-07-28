@@ -1,20 +1,7 @@
 import { ethers } from "hardhat";
 import fs from "fs";
-import { BigNumberish } from "ethers";
 import { CONTRACT_ADDR } from "./constants";
-
-const keypress = async () => {
-    process.stdin.setRawMode(true)
-    return new Promise(resolve => process.stdin.once('data', data => {
-      const byteArray = [...data]
-      if (byteArray.length > 0 && byteArray[0] === 3) {
-        console.log('Bye!\n^C')
-        process.exit(1)
-      }
-      process.stdin.setRawMode(false)
-      resolve(true)
-    }))
-}
+import { keypress } from "./utils";
 
 const getTimestamp = () => {
     if(getTimestamp._currentTimestamp == 0) {
