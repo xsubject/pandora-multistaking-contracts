@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-etherscan';
 import '@nomiclabs/hardhat-ethers';
+import '@typechain/hardhat'
 
 dotenv.config();
 
@@ -30,5 +31,12 @@ module.exports = {
       },
       loggingEnabled: false
     }
-  }
+  },
+  typechain: {
+    outDir: 'scripts/types',
+    target: 'ethers-v5',
+    alwaysGenerateOverloads: false, // should overloads with full signatures like deposit(uint256) be generated always, even if there are no overloads?
+    externalArtifacts: ['externalArtifacts/*.json'], // optional array of glob patterns with external artifacts to process (for example external libs from node_modules)
+    // dontOverrideCompile: false // defaults to false
+  },
 };

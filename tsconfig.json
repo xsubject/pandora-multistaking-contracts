@@ -9,6 +9,6 @@
     "rootDirs": ["./src", "./scripts", "./test"]
     // "types": ["chai", "mocha", "node"]
   },
-  "include": ["./src/**/*", "./scripts", "./test", "./test/**/*"],
+  "include": ["./src/**/*", "./scripts", "./test", "./test/**/*", "./typechain-types"],
   "files": ["./hardhat.config.ts"]
 }

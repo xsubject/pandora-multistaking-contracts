@@ -17,23 +17,37 @@ async function main() {
 
     let i = 0;
     let buffer: number[] = [];
+
+    const sendBatch = async () => {
+        console.log("Send batch:", buffer.join(","));
+
+        const gas = await pm.estimateGas.deposit(buffer);
+        const tx = await pm.deposit(buffer, {
+            gasLimit: gas.div(100).mul(120),
+            gasPrice: ethers.utils.parseUnits("5", "gwei")
+        });
+        
+        console.log(tx.hash);
+        await tx.wait(5);
+        buffer = [];
+    }
+
     while(i < stakedTokens.length) {
         const tokenId = stakedTokens[i];
         const owner = await nft.ownerOf(tokenId);
         if(owner == signer.address) {
-            console.log(`Add ${tokenId.toString()} to batch...`);
+            console.log(`Add ${tokenId.toString()} to batch, owner: ${owner}`);
             buffer.push(tokenId);
-            
-            if(buffer.length >= 10 || i == stakedTokens.length-1) {
 
-                console.log("Send batch...")
-                const tx = await pm.deposit(buffer);
-                console.log(tx.hash);
-                await tx.wait(5);
-                buffer = [];
+            if(buffer.length >= 15) {
+                await sendBatch();
             }
         } else {
             console.log(`Skip ${tokenId}, owner: ${owner}`);
+        }
+
+        if(i == stakedTokens.length-1 && buffer.length > 0) {
+            await sendBatch();
         }
         i++;
     }

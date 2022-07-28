@@ -2,10 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
-import "./interfaces/IExchange.sol";
-import "./interfaces/ISwapRouter01.sol";
 import "./interfaces/IERC20.sol";
 import "./interfaces/IERC721.sol";
+import "./interfaces/IStaking.sol";
 import "./Worker.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./interfaces/IERC721Receiver.sol";
@@ -23,14 +22,20 @@ contract PandoraMultistaking is IERC721Receiver {
         _;
     }
 
-    EnumerableSet.UintSet private allTokens;
     EnumerableSet.AddressSet private workers;
 
-    IExchange private exchange = IExchange(0x4B283fB988A4ACD634c3Fea6C1ef8d5078bDB4D7);
-    address private pandoErc721 = 0xd721214DA2c92f927745Bf7F23e8926A3Fed315A;
-    IERC721 private pando = IERC721(pandoErc721);
+    IERC721 public pando;
+    IStaking public staking;
 
-    ISwapRouter01 private router = ISwapRouter01(0xC2426F2018f13Fdc5b260Bd0A88be753ee7FaFc5);
+    constructor(
+        IERC721 _pando, 
+        IStaking _staking
+    ) {
+        pando = _pando;
+        staking = _staking;
+
+        workers.add(address(new Worker(pando, staking)));
+    }
 
     IERC20 private busd = IERC20(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
 
@@ -49,7 +54,7 @@ contract PandoraMultistaking is IERC721Receiver {
             emit Deposited(tokenId, address(worker));
         } else {
             console.log("Create new worker...");
-            workers.add(address(new Worker(pandoErc721)));
+            workers.add(address(new Worker(pando, staking)));
             stake(tokenId);
         }
     }
@@ -103,10 +108,6 @@ contract PandoraMultistaking is IERC721Receiver {
             pando.transferFrom(msg.sender, address(this), tokenIds[i]);
             stake(tokenIds[i]);
         }
-    }
-
-    constructor() {
-        workers.add(address(new Worker(pandoErc721)));
     }
 
     receive() external payable {}

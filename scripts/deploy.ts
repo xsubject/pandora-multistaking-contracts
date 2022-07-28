@@ -15,7 +15,7 @@ async function main() {
 
   // We get the contract to deploy
   const PM = await ethers.getContractFactory("PandoraMultistaking");
-  const pm = await PM.deploy();
+  const pm = await PM.deploy("0xd721214DA2c92f927745Bf7F23e8926A3Fed315A", "0x9CFB7714527B58A04C2f78B4215e3e4feF598e66");
   const [signer] = await ethers.getSigners();
 
   await pm.deployed();

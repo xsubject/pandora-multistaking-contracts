@@ -8,7 +8,7 @@ import "./interfaces/IERC721.sol";
 
 contract Worker is IERC721Receiver {
     using EnumerableSet for EnumerableSet.UintSet;
-    IStaking private staking = IStaking(0x9CFB7714527B58A04C2f78B4215e3e4feF598e66);
+    IStaking private staking;
     IERC721 private erc721;
 
     EnumerableSet.UintSet private tokens;
@@ -19,8 +19,9 @@ contract Worker is IERC721Receiver {
         _;
     }
 
-    constructor(address erc721Address) {
-        erc721 = IERC721(erc721Address);
+    constructor(IERC721 _erc721, IStaking _staking) {
+        staking = _staking;
+        erc721 = _erc721;
         erc721.setApprovalForAll(address(staking), true);
     }
 
@@ -66,5 +67,14 @@ contract Worker is IERC721Receiver {
 
     function len() external view returns (uint256) {
         return tokens.length();
+    }
+
+    function getTokenIds() external view returns (uint256[] memory) {
+        uint256 tokensLen = tokens.length();
+        uint256[] memory t = new uint256[](tokensLen);
+        for (uint256 i = 0; i < tokensLen; i++) {
+            t[i] = tokens.at(i);
+        }
+        return t;
     }
 }
