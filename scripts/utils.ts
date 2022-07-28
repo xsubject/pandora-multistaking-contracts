@@ -1,5 +1,6 @@
-import { BigNumber, Contract } from "ethers";
+import { BigNumber, BigNumberish, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { Bright, Dim, FgCyan, FgGreen, FgMagenta, FgYellow, Reset, Underscore } from "./colors";
 import { CONTRACT_ADDR, NFT_ADDR, STAKING_ADDR } from "./constants";
 import { IERC721, IStaking, PandoraMultistaking, Worker } from "./types";
 
@@ -81,4 +82,33 @@ export const keypress = async () => {
       process.stdin.setRawMode(false)
       resolve(true)
     }))
+}
+
+export const formatTokenInfo = (tokenId: number, level: number) => {
+    let color = Reset;
+
+    switch(level) {
+        case 1:
+            color = FgCyan;
+            break;
+        case 2:
+            color = FgGreen;
+            break;
+        case 3:
+            color = FgYellow;
+            break;
+        case 4:
+            color = FgMagenta;
+            break;
+    }
+
+    return `${color}${Bright}L${level}${Reset}${color}${Dim}#${tokenId}${Reset}`;
+}
+
+export const formatAmount = (amount: BigNumberish | undefined, decimals: number = 18, symbol: string = "???") => {
+    const amt = amount != undefined ? 
+        parseFloat(ethers.utils.formatUnits(amount, decimals)).toFixed(2) :
+        "?.??";
+
+    return `${Underscore}${Bright}${FgYellow}${amt + `${Reset}${FgYellow} ${symbol}${Reset}`}`;
 }

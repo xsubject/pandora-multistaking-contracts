@@ -1,58 +1,25 @@
 import { BigNumber, BigNumberish, Contract } from "ethers";
 import { formatUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { BgYellow, Blink, Bright, Dim, FgBlack, FgBlue, FgCyan, FgGreen, FgMagenta, FgYellow, Hidden, removeColors, Reset, Reverse, Underscore } from "./colors";
-import { CONTRACT_ADDR, NFT_ADDR, STAKING_ADDR } from "./constants";
-import stakedTokens from "./stakedTokens";
-import { getTokenLevels, getWorkerAt, getWorkerInfo, getWorkersCount, TokenInfo } from "./utils";
+import { BgYellow, Blink, Bright, Dim, FgBlue, FgGreen, FgYellow, removeColors, Reset, Underscore } from "./colors";
+import { formatAmount, formatTokenInfo, getStaking, getTokenLevels, getWorkerAt, getWorkerInfo, getWorkersCount } from "./utils";
 
-
-const formatTokenInfo = (tokenId: number, level: number) => {
-    let color = Reset;
-
-    switch(level) {
-        case 1:
-            color = FgCyan;
-            break;
-        case 2:
-            color = FgGreen;
-            break;
-        case 3:
-            color = FgYellow;
-            break;
-        case 4:
-            color = FgMagenta;
-            break;
-    }
-
-    return `${color}${Bright}L${level}${Reset}${color}${Dim}#${tokenId}${Reset}`;
-}
 
 const wait = async (timeout: number) => new Promise(done => setTimeout(done, timeout));
 
 async function main() {
     console.log(`${BgYellow}  Index\t${" ".repeat(18)}Address${" ".repeat(18)}${" ".repeat(14)}Tokens${" ".repeat(15)} Per day ${Reset}`);
 
-    const pm = await ethers.getContractAt("PandoraMultistaking", CONTRACT_ADDR);
-    const staking = await ethers.getContractAt("IStaking", STAKING_ADDR);
+    const staking = await getStaking();
     const busd = await ethers.getContractAt("IERC20", "0xe9e7cea3dedca5984780bafc599bd69add087d56");
-    const nft = await ethers.getContractAt("IDroidBot", NFT_ADDR);
     const decimals = await busd.decimals();
 
     const rewardPerSecond = await staking.rewardPerSecond();
     const rewardPerDay = rewardPerSecond.mul(3600).mul(24);
     const totalPower = (await staking.totalPower()).toNumber();
-    let allTokens: TokenInfo[] = [];
     let workersPower = 0;
 
-
-    const formatBusd = (amount: BigNumberish | undefined) => {
-        const amt = amount != undefined ? 
-            parseFloat(formatUnits(amount, decimals)).toFixed(2) :
-            "?.??";
-
-        return `${Underscore}${Bright}${FgYellow}${amt + `${Reset}${FgYellow} BUSD${Reset}`}`;
-    }
+    const formatBusd = (amount: BigNumberish | undefined) => formatAmount(amount, decimals, "BUSD");
 
     const calculateRewardPerDay = (power: BigNumberish): {percent: number, amount: BigNumber} => {
         if(typeof power == "object") {
